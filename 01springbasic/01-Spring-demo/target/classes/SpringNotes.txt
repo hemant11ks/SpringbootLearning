@@ -1,0 +1,106 @@
+We can run spring from the command line:
+
+No need to open any ide the server is embedded in out JAR file so there is no need of seperate server installed/ running.
+
+Springboot apps are self contained as demo.jar include demo and Tomcat.
+
+STEPS:
+
+1. Option a. Use java -jar "demoapp"
+2. Option b. Use Spring Boot Maven plugin -> mvnw spring-boot:run
+
+mvnw.cmd for MS Windows -> mvnw clean compile test
+mvnw.sh for Linux/Mac -> ./mvnw clean compile test
+
+If maven is already installed thant ignore mvnw files.
+you can simply use mvn clean compile test
+
+DEVELOPMENT PROCESS:
+
+1. Exit the ide
+2. Package the app using mvnw Package
+3. Run app using java -jar
+4. Run app using Spring boot plugin mvnw spring-boot:run
+
+To check Java version: echo %JAVA_HOME%
+                   or  java --version
+
+                 1.  First open cmd paste directory using right click
+                 2.  mvnw package
+                 3. java -jar target\_PROJECTJAR_
+                 // We can also run using Springboot maven plugin using: mvnw spring-boot:run
+                 ---------------------------------------------------------------------------------------
+                 4. cd ____
+                 // mvnw package will create the JAR file for our application so JAR is created in the "target" sub-directory
+                 5. ./mvnw package
+
+                 // If you already have Maven installed just use mvn package
+                 Now->  cd target
+                 or     ls *.jar // will display jar
+                        java -jar mycoolapp-0.0.1-SNAPSHOT.jar
+
+                        we can also run using maven plugin
+                        ./mvnw spring-boot:run
+
+# We can also define custom properties:
+first.name=hemant
+last.name=kumar
+
+# Now inject properties into spring boot app in rest controller
+
+@RestController
+public class FunRestController {
+// inject properties
+@Value("${first.name}")
+private String firstname;
+}                        
+
+
+// Inversion of Control (IOC)
+The approach of outstanding the contruction and management of objects. hence application should be configurable.
+
+SPRING CONTAINER:  
+Primary function are :
+1. create and manage objects (Inversion of control) 
+2. and Inject object dependencies (Dependency Injection).
+
+Configuring Spring container:
+
+1. XML configuration file(legacy) ---> old solution
+2. Java Annotation (modern)
+3. Java Source Code (modern)
+
+SPRING DEPENDENCY INJECTION: The client delegates to another object responsibility of providing its dependencies
+
+Example: Like accessing car object from car factory(Spring object factory) if parts are not assembled the car factory first assemble 
+using the configuration  and dependencies (helper objects) then deliver the object
+
+INJECTION TYPES:
+1. Constructor Injection (use when you have required dependencies)
+2. Setter Injection (use when you have optional dependencies)
+
+SPRING autoWIRING:
+For Dependency injection spring can use autoWIRING
+Spring will look for a class that matches by type like class or interface
+Spring will inject automatically hence it is autowired.
+
+Autowiring Example: Like injecting a coach implementation.
+Spring will scan for @Components -> Anyone implements the coach interface -> it so lets inject them for example CricketCoach.
+
+Example application:
+
+WEB BROWSER   --dailyworkout->   DEMO CONTROLLER  --getDailyWorkout()-->     COACH
+                                                 <--Practice fast bowling
+                                                    for 15 minutes
+
+Development Process - Constructor Injection:
+
+1. Define the dependency interface and class.
+2. Create Demo REST Controller.
+3. Create a contructor in your class for injections.
+4. Add @GetMapping for /dailyworkout.     
+
+@Component Annotation : makes the bean available for dependency injection
+As @Component marks class as Spring Bean. A spring bean is just a regular Java class that is managed by spring.
+
+Note: If you only have one contructor then @Autowired on contructor is optional. As @Autowired Annotation tells Spring to inject a dependency.
