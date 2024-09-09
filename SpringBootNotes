@@ -1,0 +1,279 @@
+Spring Notes:
+
+Inversion of Control:
+
+-> Approach for outsourcing the coonstruction and managemen of objects.
+
+We can configure Spring Container by:
+1. XML COnfuguration file(legacy) : Old way
+2. Java Annotation(modern)
+3. Java Source Code(modern)
+
+---------------------------------------------------------------------------------------------------------------------
+
+Spring Container:
+
+       give me "Coach" object
+MyApp---------------------------> Object Factory (Spring)
+                                         |
+                                     Configuration
+                                         |
+                       CricketCoach   HockeyCoach   BaseballCoach  [dependencies
+                                                                    helper objects]
+Primary function of Spring Container is:
+Create and manage objects (Inversion of Control)
+Inject objects dependencies (Dependency Injection)
+
+Demo Example:    Democontroller-----
+                                   |
+                                 Coach
+                                 
+Coach will provide daily workouts
+The Democontroller wants to use a Coach
+New helper: Coach
+This is a dependency
+Need to inject this dependency 
+                                        
+------------------------------------------------------------------------------------------------------------------------
+
+
+Dependency Injection: Client delegates to another object the responsibility of providing its dependencies. ("Give me object")
+
+Demo Example:    Democontroller-----
+                                   |
+                                 Coach
+                                 
+Coach will provide daily workouts
+The Democontroller wants to use a Coach
+New helper: Coach
+This is a dependency
+Need to inject this dependency 
+
+
+
+Injection Types:
+1. Conctructor Injection (when you have required dependencies)
+2. Setter Injection (when you have optional dependencies)
+
+-------------------------------------------------------------------------------------------------------------------------------
+
+Spring Auto Wiring:
+For dependency injection, Spring can use autowiring
+Spring will look for a class that matches type: class or interface
+Spring will inject it automatically hence it is autowired.
+
+ Example: Autowiring 
+ Injecting a coach implementation.
+ Spring will scan for @Components.
+ Any one implements the Coach interface.???
+ If so lets inject them for ex. CricketCoach.
+ 
+             /dailyworkout                 getDailyWorkout() 
+ Web browser -------------> DemoController --------------->   Coach
+             <-------------                <---------------
+             "Practice fast                "Practice fast 
+              bowling"                      bowling"
+ 
+ ---------------------------------------------------------------------------------------------------------------------------
+              
+Creating Construction Injection:
+1. Define the dependency interface and class.
+2. Create Demo REST COntroller.
+3. Create a constructor in your class for injections.
+4. Add @GetMapping for /dailyworkout.
+
+@Component // Componenet annotation mark the class as String bean indicates available for dependency inject
+
+We can use contructor injection to give the object custom object value.
+
+Behind the scene spring will do: 
+    Spring Framework internally 
+    Coach theCoach = new CricketCoach();
+    DemoController demoController = new DemoCOntroller(theCoach);
+
+---------------------------------------------------------------------------------------------------------------------------
+
+Setter Injection:
+
+1. Create a setter method in your class for injections.
+2. Configure the dependency injection with @Autowired Annotation.
+
+Behind the scene spring will do: 
+   Coach theCoach = new CricketCoach();
+   DemoController demoController = new DemoController();
+   demoCOntroller.setCoach(theCoach);
+   
+   
+ We can inject dependemcies by calling ANY method on your class using @Autowired
+ 
+ -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ Field Injection: Old : used only in legacy projects "Spring ios team does not recommend field injection".
+ 
+ Inject dependencies by setting fieled values on your class directly (even private field).
+ 
+ Accomplished by using Java Reflection.
+ 
+ It can be done by configuring depencdency injection with Autowired Annotation.
+ 
+ --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ Qualifiers:
+ 
+If we have mutiple class implementation we can use qualifiers to pick individual class by its name.
+We can specify the bean id: cricketCoach Same name as class, first character in lower case.
+
+
+public DemoController(@Qualifier(cricketCoach) Coach theCoach) {
+    myCoach = theCoach;
+}
+
+Note: If multiple classes are there with component annotation then spring will consider these classes if not then it will ignore.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+@Primary : Annotation is used to make implemented class as primary so the springboot will not confuse while considering implemented class.
+
+We can either use primary or qualifier, but qualifier is suggested because it is mentioned in demo controller, developer will easily change if required.
+We can have only singe memory class.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ Initialization:
+ 
+ By default, when your aaplication starts, all beans are initialized @Component, etc.
+ Spring will create an instance ef each and make then av
+ 
+ When we start the application:
+ In constructor:CricketCoach
+ In constructor:FootballCoach....
+ 
+By default when application starts, all beans are initiated Spring will create an instance of each and make them available.
+ 
+Spring if we make class as @Lazy bean is not initiated as we are not injecting.
+ 
+Lazy Initialization:
+
+To configure other beans for lazy initialization we need to add @Lazy to each class.
+We could set the global configuration property
+As all beans are lazy... no beans are created until needed including our DemoController.
+
+spring.main.lazy-initialization=true...
+
+Lazy feature is disabled by default you should profile your application before configuring lazy initialization. to avoid common pitfall of premature optimization.
+
+Note: when we have restcontroller it not created until request.
+
+We can add Diagnostics : Add println to contructors
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Bean Scopes:
+
+->Scope refers to lifecycle of a bean
+->How long does the bean live
+->How many instances are created
+->How is bean shared
+
+Default Scope is singleton
+
+What is singleton: Spring containrer creates only one instance of bean by default. It is cached in memory.
+All dependency injections for the bean will reference the SAME bean.
+Singleton point to same instance.
+
+We can also explicitly specify bean scope;
+
+@Scope(COnfigurableBeanFactory.SCOPE_SINGLETON)
+
+Prototype Bean Scope: create new bean instance for each container requeist
+
+
+Bean Lifecycle:
+
+Container -> Bean Intantiated -> Dependencies Injected -> Internal Spring Processing -> Your custom Init method
+                                                                                                 |
+                                                                                       Bean is ready for use and container is shutdown (Your custom method is destroy)
+                                                                                                 |
+                                                                                                STOP
+
+Bean Lifecycle methods / Hooks
+
+1. You can add custom code during bean initialization
+2. Calling custom business logic methods
+3. Setting up handles to resources (db, sockets, file etc)
+
+4. You can add custom code during bean desctruction
+5. Calling custom business logic method
+6. Clean up handles to resources (db,sockets,files etc)
+
+Development Process:
+1. Define your methods for init and destroy
+2. Add annotation @PostCOnstruct and @PreDestroy
+
+
+Prototype Beans and Destroy Life cycle : There is a subtle point you need to be aware with "prototype" scoped beans.
+
+For "prototype" scoped beans, SPring does not call destrop method
+
+IN constrast to other scopes spring does not manage the complete lifecycle of prototype bean: the container initiates, 
+configures and otherwise assembles a prototype object and hands to client, with no further record of that protocol.
+
+Thus although initialization lifecycle callback methods are called on all objects regardless of scope in prototypes, 
+configured destruction lifecycle callbacks are not called.
+The client code must clean up prototype objects and release expensive resoruces that prototype beans are holding.
+                                                                                                  
+       -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------                                                                                         
+ Why we use @Bean as we already have @Component ?
+ -> Making an existing third party class avaialble to Spring framework you may not have access to source code of third party class.
+ -> However you woould like to use third party class as Spring bean.
+ -> Using AWS S3 cloud as we dont have access to source code.
+ 
+Steps to create Bean:
+Step1. Create Java class and annote as @Configuration / able
+Step2. Define @Bean method to configure the bean
+Step3. Inject the bean into our controller
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+             
